@@ -1,0 +1,19 @@
+{
+  "name": "dev",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "llvm-vs-code-extensions.vscode-clangd"
+      ],
+      "settings": {
+        "clangd.path": "/usr/bin/clangd",
+        "C_Cpp.intelliSenseEngine": "disabled",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "postCreateCommand": "cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON || true"
+}
