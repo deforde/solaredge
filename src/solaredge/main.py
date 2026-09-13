@@ -12,7 +12,10 @@ def _signed16(value: int) -> int:
 
 
 def _scaled(value: int, scale_factor: int) -> float:
-    return value * (10 ** _signed16(scale_factor))
+    scale = _signed16(scale_factor)
+    if not -100 <= scale <= 100:
+        raise ValueError(f"invalid SunSpec scale factor {scale}")
+    return value * (10**scale)
 
 
 def _unsigned32(high: int, low: int) -> int:
@@ -73,12 +76,20 @@ def main() -> None:
             raise SystemExit("Could not read SunSpec inverter measurements")
 
         registers = values.registers
-        print(f"AC power: {_scaled(_signed16(registers[4]), registers[5]):.0f} W")
-        print(f"AC current: {_scaled(registers[0], registers[1]):.2f} A")
-        print(f"AC voltage: {_scaled(registers[2], registers[3]):.1f} V")
-        print(f"Frequency: {_scaled(registers[6], registers[7]):.2f} Hz")
-        lifetime_energy = _unsigned32(registers[14], registers[15])
-        print(f"Lifetime energy: {_scaled(lifetime_energy, registers[16]):.0f} Wh")
+        try:
+            print(f"AC power: {_scaled(_signed16(registers[4]), registers[5]):.0f} W")
+            print(f"AC current: {_scaled(registers[0], registers[1]):.2f} A")
+            print(f"AC voltage: {_scaled(registers[2], registers[3]):.1f} V")
+            print(f"Frequency: {_scaled(registers[6], registers[7]):.2f} Hz")
+            lifetime_energy = _unsigned32(registers[14], registers[15])
+            print(f"Lifetime energy: {_scaled(lifetime_energy, registers[16]):.0f} Wh")
+        except (IndexError, ValueError) as error:
+            raw_registers = " ".join(f"{value:04x}" for value in registers)
+            raise SystemExit(
+                f"Invalid SunSpec model 101 data: {error}. "
+                f"Model address={model_address}, length={model_length}; "
+                f"raw registers={raw_registers}"
+            ) from error
     finally:
         client.close()
 
