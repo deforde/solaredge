@@ -79,7 +79,7 @@ def main() -> None:
 
         registers = values.registers
         try:
-            print(f"AC power: {_scaled(_signed16(registers[9]), registers[13]):.0f} W")
+            print(f"AC power: {_scaled(_signed16(registers[12]), registers[13]):.0f} W")
             print(f"AC current: {_scaled(registers[0], registers[4]):.2f} A")
             print(f"AC voltage: {_scaled(registers[5], registers[8]):.1f} V")
             print(f"Frequency: {_scaled(registers[14], registers[15]):.2f} Hz")
