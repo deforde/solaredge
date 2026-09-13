@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "solaredge"
+version = "0.1.0"
+description = "SolarEdge utilities"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+solaredge = "solaredge.main:main"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/solaredge"]
+
+[tool.ruff]
+line-length = 88
