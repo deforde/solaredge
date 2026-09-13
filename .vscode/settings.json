@@ -1,6 +1,0 @@
-{
-    "clangd.arguments": [
-        "--compile-commands-dir=${workspaceFolder}/build",
-        "--query-driver=/usr/bin/arm-linux-gnueabihf-g*,/usr/bin/g++,/usr/bin/gcc"
-    ]
-}
