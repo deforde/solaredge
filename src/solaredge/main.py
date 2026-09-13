@@ -67,6 +67,8 @@ def main() -> None:
             model_address += 2 + model_length
 
         # Model 101 offsets are relative to the first register after its header.
+        # This is the extended three-phase layout: phase fields precede the
+        # shared scale factors for current, voltage, and power.
         values = client.read_holding_registers(
             address=model_address + 2,
             count=model_length,
@@ -77,12 +79,12 @@ def main() -> None:
 
         registers = values.registers
         try:
-            print(f"AC power: {_scaled(_signed16(registers[4]), registers[5]):.0f} W")
-            print(f"AC current: {_scaled(registers[0], registers[1]):.2f} A")
-            print(f"AC voltage: {_scaled(registers[2], registers[3]):.1f} V")
-            print(f"Frequency: {_scaled(registers[6], registers[7]):.2f} Hz")
-            lifetime_energy = _unsigned32(registers[14], registers[15])
-            print(f"Lifetime energy: {_scaled(lifetime_energy, registers[16]):.0f} Wh")
+            print(f"AC power: {_scaled(_signed16(registers[9]), registers[13]):.0f} W")
+            print(f"AC current: {_scaled(registers[0], registers[4]):.2f} A")
+            print(f"AC voltage: {_scaled(registers[5], registers[8]):.1f} V")
+            print(f"Frequency: {_scaled(registers[14], registers[15]):.2f} Hz")
+            lifetime_energy = _unsigned32(registers[22], registers[23])
+            print(f"Lifetime energy: {_scaled(lifetime_energy, registers[24]):.0f} Wh")
         except (IndexError, ValueError) as error:
             raw_registers = " ".join(f"{value:04x}" for value in registers)
             raise SystemExit(
