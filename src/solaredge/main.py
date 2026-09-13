@@ -15,6 +15,10 @@ def _scaled(value: int, scale_factor: int) -> float:
     return value * (10 ** _signed16(scale_factor))
 
 
+def _unsigned32(high: int, low: int) -> int:
+    return (high << 16) | low
+
+
 def main() -> None:
     port = os.getenv("SOLAREDGE_PORT", "/dev/ttyUSB0")
     unit_id = int(os.getenv("SOLAREDGE_UNIT_ID", "1"))
@@ -62,18 +66,19 @@ def main() -> None:
         # Model 101 offsets are relative to the first register after its header.
         values = client.read_holding_registers(
             address=model_address + 2,
-            count=40,
+            count=model_length,
             device_id=unit_id,
         )
         if values.isError():
             raise SystemExit("Could not read SunSpec inverter measurements")
 
         registers = values.registers
-        print(f"AC power: {_scaled(registers[18], registers[19]):.0f} W")
+        print(f"AC power: {_scaled(_signed16(registers[4]), registers[5]):.0f} W")
         print(f"AC current: {_scaled(registers[0], registers[1]):.2f} A")
-        print(f"AC voltage: {_scaled(registers[13], registers[14]):.1f} V")
-        print(f"Frequency: {_scaled(registers[20], registers[21]):.2f} Hz")
-        print(f"Lifetime energy: {_scaled(registers[28], registers[29]):.0f} Wh")
+        print(f"AC voltage: {_scaled(registers[2], registers[3]):.1f} V")
+        print(f"Frequency: {_scaled(registers[6], registers[7]):.2f} Hz")
+        lifetime_energy = _unsigned32(registers[14], registers[15])
+        print(f"Lifetime energy: {_scaled(lifetime_energy, registers[16]):.0f} Wh")
     finally:
         client.close()
 
