@@ -1,3 +1,4 @@
+from time import time
 import traceback
 
 from pymodbus.client import ModbusSerialClient
@@ -79,6 +80,7 @@ class SunSpecReader:
             try:
                 # lifetime_energy = SunSpecReader.__unsigned32(registers[22], registers[23])
                 data = {
+                    "timestamp": int(time()),
                     "power": SunSpecReader.__scaled(SunSpecReader.__signed16(registers[12]), registers[13]),
                     "current": SunSpecReader.__scaled(registers[0], registers[4]),
                     "voltage": SunSpecReader.__scaled(registers[5], registers[8]),
