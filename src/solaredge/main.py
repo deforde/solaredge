@@ -1,4 +1,4 @@
-from time import monotonic
+from time import monotonic, sleep
 from pprint import pprint
 
 from solaredge.database.database import Database
@@ -16,6 +16,7 @@ def main() -> None:
                 database.add_measurement(data)
                 pprint(data)
                 last_sample_timestamp = now
+            sleep(1)
 
 if __name__ == "__main__":
     main()
