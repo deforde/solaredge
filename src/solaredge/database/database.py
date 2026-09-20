@@ -1,9 +1,13 @@
+from datetime import datetime
+from time import monotonic
 import os
 import sqlite3
 import traceback
 
 DATABASE_FILE = "/home/debian/data/solaredge.db"
 MEASUREMENT_COLUMNS = ("timestamp", "power", "current", "voltage", "frequency")
+DATABASE_BACKUP_PERIOD = 3600  # seconds
+MAX_DATABASE_BACKUPS = 5
 
 class Database:
     def __init__(self, database_file: str = DATABASE_FILE) -> None:
@@ -11,9 +15,13 @@ class Database:
         database_directory = os.path.dirname(database_file)
         if database_directory:
             os.makedirs(database_directory, exist_ok=True)
+        self.__last_backup_timestamp = 0
 
     def __enter__(self) -> "Database":
         self.__conn = sqlite3.connect(self.__database_file)
+        self.__conn.execute("PRAGMA journal_mode = WAL")
+        self.__conn.execute("PRAGMA synchronous = FULL")
+        self.__conn.execute("PRAGMA busy_timeout = 5000")
         self.__conn.execute(
             """
             CREATE TABLE IF NOT EXISTS measurements (
@@ -54,6 +62,8 @@ class Database:
         )
         self.__conn.commit()
 
+        self.__backup_database()
+
     def get_measurements(
         self,
         start_timestamp: int,
@@ -77,3 +87,35 @@ class Database:
             print(f"An error occurred: {exc_val}")
             traceback.print_exception(exc_type, exc_val, exc_tb)
         return False
+
+    def __backup_database(self) -> None:
+        now = monotonic()
+        if now - self.__last_backup_timestamp >= DATABASE_BACKUP_PERIOD:
+            backup_file = (
+                f"{self.__database_file}_"
+                f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.bak"
+            )
+            try:
+                with sqlite3.connect(backup_file) as backup_conn:
+                    self.__conn.backup(backup_conn)
+                self.__last_backup_timestamp = now
+                print(f"Database backup created at {backup_file}")
+                self.__remove_old_backups()
+            except Exception as e:
+                print(f"Failed to create database backup: {e}")
+
+    def __remove_old_backups(self) -> None:
+        backup_prefix = f"{self.__database_file}_"
+        backup_directory = os.path.dirname(self.__database_file) or "."
+        backup_files = [
+            entry.path
+            for entry in os.scandir(backup_directory)
+            if entry.is_file()
+            and entry.path.startswith(backup_prefix)
+            and entry.path.endswith(".bak")
+        ]
+        backup_files.sort(reverse=True)
+
+        for old_backup in backup_files[MAX_DATABASE_BACKUPS:]:
+            os.remove(old_backup)
+            print(f"Old database backup deleted: {old_backup}")
