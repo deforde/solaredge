@@ -1,0 +1,12 @@
+services:
+  duckdb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: solaredge-duckdb
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash", "/workspace/build.sh"]

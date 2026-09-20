@@ -3,7 +3,7 @@ import traceback
 
 import duckdb
 
-DATABASE_FILE = "/home/debiad/data/solaredge.db"
+DATABASE_FILE = "/home/debian/data/solaredge.db"
 MEASUREMENT_COLUMNS = ("timestamp", "power", "current", "voltage", "frequency")
 
 class Database:
@@ -53,13 +53,21 @@ class Database:
             [measurements[column] for column in MEASUREMENT_COLUMNS],
         )
 
-    def get_measurements(self) -> list[tuple]:
-        return self.__conn.execute(
-            """
+    def get_measurements(
+        self,
+        start_timestamp: int,
+        end_timestamp: int,
+    ) -> list[tuple]:
+        query = """
             SELECT timestamp, power, current, voltage, frequency
             FROM measurements
+            WHERE (? IS NULL OR timestamp >= ?)
+              AND (? IS NULL OR timestamp <= ?)
             ORDER BY timestamp
-            """
+        """
+        return self.__conn.execute(
+            query,
+            [start_timestamp, start_timestamp, end_timestamp, end_timestamp],
         ).fetchall()
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
