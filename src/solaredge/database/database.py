@@ -1,7 +1,6 @@
 import os
+import sqlite3
 import traceback
-
-import duckdb
 
 DATABASE_FILE = "/home/debian/data/solaredge.db"
 MEASUREMENT_COLUMNS = ("timestamp", "power", "current", "voltage", "frequency")
@@ -14,15 +13,15 @@ class Database:
             os.makedirs(database_directory, exist_ok=True)
 
     def __enter__(self) -> "Database":
-        self.__conn = duckdb.connect(self.__database_file)
+        self.__conn = sqlite3.connect(self.__database_file)
         self.__conn.execute(
             """
             CREATE TABLE IF NOT EXISTS measurements (
-                timestamp BIGINT NOT NULL,
-                power DOUBLE NOT NULL,
-                current DOUBLE NOT NULL,
-                voltage DOUBLE NOT NULL,
-                frequency DOUBLE NOT NULL
+                timestamp INTEGER NOT NULL,
+                power REAL NOT NULL,
+                current REAL NOT NULL,
+                voltage REAL NOT NULL,
+                frequency REAL NOT NULL
             )
             """
         )
@@ -32,6 +31,7 @@ class Database:
             ON measurements (timestamp)
             """
         )
+        self.__conn.commit()
         return self
 
     def add_measurement(
@@ -52,6 +52,7 @@ class Database:
             """,
             [measurements[column] for column in MEASUREMENT_COLUMNS],
         )
+        self.__conn.commit()
 
     def get_measurements(
         self,
