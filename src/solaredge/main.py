@@ -4,7 +4,7 @@ from pprint import pprint
 from solaredge.database.database import Database
 from solaredge.sunspec.sunspec_reader import SunSpecReader
 
-SAMPLE_PERIOD = 5
+SAMPLE_PERIOD = 30 * 60  # seconds
 
 def main() -> None:
     with SunSpecReader() as reader, Database() as database:
@@ -14,9 +14,9 @@ def main() -> None:
             if now - last_sample_timestamp >= SAMPLE_PERIOD:
                 data = reader.read_inverter_measurements()
                 database.add_measurement(data)
-                pprint(data)
+                # pprint(data)
                 last_sample_timestamp = now
-            sleep(1)
+            sleep(SAMPLE_PERIOD - (now - last_sample_timestamp))
 
 if __name__ == "__main__":
     main()
