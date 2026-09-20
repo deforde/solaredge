@@ -1,0 +1,18 @@
+[Unit]
+Description=SolarEdge inverter sampler
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=debian
+Group=debian
+SupplementaryGroups=dialout
+WorkingDirectory=/home/debian/solaredge
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/debian/solaredge/.venv/bin/solaredge
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

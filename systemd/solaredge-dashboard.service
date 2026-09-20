@@ -1,0 +1,19 @@
+[Unit]
+Description=SolarEdge measurement dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=debian
+Group=debian
+WorkingDirectory=/home/debian/solaredge
+Environment=PYTHONUNBUFFERED=1
+Environment=SOLAREDGE_DASHBOARD_HOST=0.0.0.0
+Environment=SOLAREDGE_DASHBOARD_PORT=5000
+ExecStart=/home/debian/solaredge/.venv/bin/solaredge-dashboard
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
