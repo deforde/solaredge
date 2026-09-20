@@ -5,6 +5,3 @@ __pycache__/
 .ruff_cache/
 dist/
 *.egg-info/
-duckdb/duckdb-python/
-duckdb/.cache/
-duckdb/.venv/
