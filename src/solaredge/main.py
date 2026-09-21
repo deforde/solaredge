@@ -28,6 +28,7 @@ def main() -> None:
                             "avg": v,
                             "cnt": 1
                         }
+            pprint(averages)
 
             now = time()
             if now >= next_sample_timestamp:
@@ -35,7 +36,6 @@ def main() -> None:
                 data["timestamp"] = next_sample_timestamp
                 database.add_measurement(data)
                 averages = {}
-                pprint(data)
                 while next_sample_timestamp <= now:
                     next_sample_timestamp += SAMPLE_PERIOD
 
