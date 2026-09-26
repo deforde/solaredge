@@ -83,7 +83,7 @@ class SunSpecReader:
                     "timestamp": int(time()),
                     "power": SunSpecReader.__scaled(SunSpecReader.__signed16(registers[12]), registers[13]),
                     "current": SunSpecReader.__scaled(registers[0], registers[4]),
-                    "voltage": SunSpecReader.__scaled(registers[5], registers[8]),
+                    "voltage": 10 * SunSpecReader.__scaled(registers[5], registers[8]),
                     "frequency": SunSpecReader.__scaled(registers[14], registers[15]),
                 }
                 return data

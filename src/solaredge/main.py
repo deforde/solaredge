@@ -4,7 +4,7 @@ from pprint import pprint
 from solaredge.database.database import Database
 from solaredge.sunspec.sunspec_reader import SunSpecReader
 
-SAMPLE_PERIOD = 30 * 60  # seconds
+SAMPLE_PERIOD = 15 * 60  # seconds
 
 def main() -> None:
     with SunSpecReader() as reader, Database() as database:
@@ -28,6 +28,7 @@ def main() -> None:
                             "avg": v,
                             "cnt": 1
                         }
+            pprint(data)
             pprint(averages)
 
             now = time()
@@ -39,7 +40,7 @@ def main() -> None:
                 while next_sample_timestamp <= now:
                     next_sample_timestamp += SAMPLE_PERIOD
 
-            sleep(10)
+            sleep(1)
 
 if __name__ == "__main__":
     main()
